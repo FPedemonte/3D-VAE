@@ -26,7 +26,7 @@ def save_output(output_arr, output_size, output_dir, file_idx):
     if not np.any(with_border_arr):
         verts, faces, normals, values = [], [], [], []
     else:
-        verts, faces, normals, values = measure.marching_cubes_lewiner(with_border_arr, level = 0.0, gradient_direction = 'descent')
+        verts, faces, normals, values = measure.marching_cubes(with_border_arr, level=0.0, gradient_direction='descent')
         faces = faces + 1
 
     obj_save = open(output_dir + '/volume' + str(file_idx) + '.obj', 'w')
