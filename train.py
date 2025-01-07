@@ -46,28 +46,28 @@ if __name__ == '__main__':
     encoder = model['encoder']
     decoder = model['decoder']
 
-    plot_model(encoder, to_file = 'vae_encoder.pdf', show_shapes = True)
-    plot_model(decoder, to_file = 'vae_decoder.pdf', show_shapes = True)
+    # Comment out all plot_model calls
+    # plot_model(encoder, to_file = 'vae_encoder.pdf', show_shapes = True)
+    # plot_model(decoder, to_file = 'vae_decoder.pdf', show_shapes = True)
+    # plot_model(vae, to_file = 'vae.pdf', show_shapes = True)
 
     vae = model['vae']
 
-    # kl_div = -0.5 * K.mean(1 + 2 * sigma - K.square(mu) - K.exp(2 * sigma))
-    voxel_loss = K.cast(K.mean(weighted_binary_crossentropy(inputs, K.clip(sigmoid(outputs), 1e-7, 1.0 - 1e-7))), 'float32') # + kl_div
+    voxel_loss = K.cast(K.mean(weighted_binary_crossentropy(inputs, K.clip(sigmoid(outputs), 1e-7, 1.0 - 1e-7))), 'float32')
     vae.add_loss(voxel_loss)
 
-    sgd = SGD(lr = learning_rate_1, momentum = momentum, nesterov = True)
-    vae.compile(optimizer = sgd, metrics = ['accuracy'])
-
-    plot_model(vae, to_file = 'vae.pdf', show_shapes = True)
+    sgd = SGD(learning_rate=learning_rate_1, momentum=momentum, nesterov=True)
+    vae.compile(optimizer=sgd)
 
     data_train = data_loader('datasets/shapenet10_chairs_nr.tar')
 
     vae.fit(
-        data_train,
-        epochs = epoch_num,
-        batch_size = batch_size,
-        validation_data = (data_train, None),
-        callbacks = [LearningRateScheduler(learning_rate_scheduler)]
+        x=data_train,
+        y=data_train,
+        epochs=epoch_num,
+        batch_size=batch_size,
+        validation_split=0.1,
+        callbacks=[LearningRateScheduler(learning_rate_scheduler)]
     )
 
     vae.save_weights('vae.h5')
